@@ -1,0 +1,14 @@
+{
+  "name": "my-itinerary-app-project",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost5000/",
+  "dependencies": {
+    "concurrently": "^8.2.1",
+    "nodemon": "^3.0.1"
+  },
+  "scripts": {
+    "installAll": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "startAll": "concurrently \"cd backend && nodemon server.js\" \"cd frontend && npm start\""
+}
+}
