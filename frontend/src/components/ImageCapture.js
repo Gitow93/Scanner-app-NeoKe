@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import Webcam from "react-webcam";
-import axios from "axios";
 
 const ImageCapture = () => {
   const webcamRef = useRef(null);
@@ -16,19 +15,13 @@ const ImageCapture = () => {
 
   const captureImage = async () => {
     const imageSrc = webcamRef.current.getScreenshot();
+    const body = JSON.stringify({ imageData: imageSrc });
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/procesar-imagen",
-        {
-          imageData: imageSrc,
-        }
-      );
-
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error al enviar la imagen al servidor:", error);
-    }
+    const response = await fetch("http://localhost:5000/process-image", {
+      method: "POST",
+      body: body,
+    });
+    // console.log("response", response);
   };
 
   return (
