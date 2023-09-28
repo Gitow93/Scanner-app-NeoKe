@@ -1,34 +1,45 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
+import Tesseract from "tesseract.js";
 
 const ImageCapture = () => {
   const webcamRef = useRef(null);
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      webcamRef.current.srcObject = stream;
-    } catch (err) {
-      console.error("Error al acceder a la cámara:", err);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const captureImage = async () => {
+    setIsLoading(true);
     const imageSrc = webcamRef.current.getScreenshot();
-    const body = JSON.stringify({ imageData: imageSrc });
 
-    const response = await fetch("http://localhost:5000/process-image", {
-      method: "POST",
-      body: body,
+    Tesseract.recognize(imageSrc, "osd+eng+spa", {
+      logger: (info) => console.log(info),
+    }).then(({ data: { text } }) => {
+      console.log("Texto extraído:", text);
+
+      fetch("http://localhost:5000/process-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Respuesta del servidor:", data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error al enviar texto al servidor:", error);
+          setIsLoading(false);
+        });
     });
-    // console.log("response", response);
   };
 
   return (
     <div>
       <Webcam ref={webcamRef} />
-      <button onClick={startCamera}>Iniciar Cámara</button>
-      <button onClick={captureImage}>Capturar Imagen</button>
+      <button onClick={captureImage} disabled={isLoading}>
+        {isLoading ? "Procesando..." : "Capturar Imagen"}
+      </button>
     </div>
   );
 };
