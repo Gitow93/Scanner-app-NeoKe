@@ -1,14 +1,18 @@
 {
-  "name": "my-itinerary-app-project",
+  "name": "scanner-app-neoke",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost5000/",
+  "proxy": "http://localhost:5000/",
   "dependencies": {
     "concurrently": "^8.2.1",
+    "dotenv": "^16.3.1",
     "nodemon": "^3.0.1"
   },
   "scripts": {
     "installAll": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "startAll": "concurrently \"cd backend && nodemon server.js\" \"cd frontend && npm start\""
-}
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  }
 }
