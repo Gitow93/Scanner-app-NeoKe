@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
 import Tesseract from "tesseract.js";
+import axios from "axios";
 
 const ImageCapture = () => {
   const webcamRef = useRef(null);
@@ -15,16 +16,20 @@ const ImageCapture = () => {
     }).then(({ data: { text } }) => {
       console.log("Texto extraído:", text);
 
-      fetch("http://localhost:5000/process-text", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Respuesta del servidor:", data);
+      axios
+        .post(
+          "http://localhost:5000/process-text",
+          {
+            text,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          console.log("Respuesta del servidor:", response.data);
           setIsLoading(false);
         })
         .catch((error) => {
