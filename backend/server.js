@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const OpenAI = require("openai");
+const axios = require("axios");
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.post("/process-text", async (req, res) => {
     });
 
     console.log("Respuesta de OpenAI:", response);
-    res.json(response.data);
+    res.json(response.choices[0].text.trim()); // Enviamos el texto reconocido
   } catch (error) {
     if (error instanceof OpenAI.APIError) {
       console.error(error.status);
@@ -34,6 +35,30 @@ app.post("/process-text", async (req, res) => {
       console.log(error);
     }
     res.send(error);
+  }
+});
+
+app.post("/translate", async (req, res) => {
+  const { text, targetLanguage } = req.body;
+
+  try {
+    const response = await axios.post(
+      "https://translation.googleapis.com/language/translate/v2",
+      {},
+      {
+        params: {
+          q: text,
+          target: targetLanguage,
+          key: process.env.GOOGLE_TRANSLATE_API_KEY,
+        },
+      }
+    );
+
+    const translation = response.data.data.translations[0].translatedText;
+    res.json({ translation });
+  } catch (error) {
+    console.error("Error al traducir:", error);
+    res.status(500).json({ error: "Error al traducir el texto" });
   }
 });
 

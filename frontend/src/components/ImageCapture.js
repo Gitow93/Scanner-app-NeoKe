@@ -6,6 +6,7 @@ import axios from "axios";
 const ImageCapture = () => {
   const webcamRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [translations, setTranslations] = useState("");
 
   const captureImage = async () => {
     setIsLoading(true);
@@ -30,7 +31,29 @@ const ImageCapture = () => {
         )
         .then((response) => {
           console.log("Respuesta del servidor:", response.data);
-          setIsLoading(false);
+
+          axios
+            .post(
+              "http://localhost:5000/translate",
+              {
+                text: response.data, // Usamos el texto reconocido
+                targetLanguage: "es", // Cambia según el idioma objetivo
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            )
+            .then((responseTranslate) => {
+              const traduccion = responseTranslate.data.translation;
+              setTranslations(traduccion); // Actualizamos el estado de traducciones
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              console.error("Error al traducir:", error);
+              setIsLoading(false);
+            });
         })
         .catch((error) => {
           console.error("Error al enviar texto al servidor:", error);
@@ -45,6 +68,12 @@ const ImageCapture = () => {
       <button onClick={captureImage} disabled={isLoading}>
         {isLoading ? "Procesando..." : "Capturar Imagen"}
       </button>
+      {translations && (
+        <div>
+          <h2>Texto reconocido:</h2>
+          <p>{translations}</p>
+        </div>
+      )}
     </div>
   );
 };
